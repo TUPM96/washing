@@ -1,0 +1,79 @@
+name: Deploy Source Code
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install SSH Pass
+        run: sudo apt-get install sshpass
+
+      - name: Install PHP 8.2 and required extensions
+        run: |
+          sudo add-apt-repository ppa:ondrej/php -y
+          sudo apt-get update
+          sudo apt-get install php8.2 php8.2-cli php8.2-mbstring php8.2-xml php8.2-zip php8.2-curl php8.2-sqlite3 -y
+          echo "exec" | sudo tee -a /etc/php/8.2/cli/conf.d/99-custom.ini
+
+      - name: Install Composer
+        run: |
+          php8.2 -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php8.2 composer-setup.php --install-dir=/usr/local/bin --filename=composer
+          php8.2 -r "unlink('composer-setup.php');"
+
+      - name: Run Composer with PHP 8.2
+        run: php8.2 /usr/local/bin/composer install --ignore-platform-reqs
+
+      - name: Create SQLite database file
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_PROD }}" >> .env
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      #      - name: Install npm dependencies
+      #        run: npm install
+      #
+      #      - name: Run npm build
+      #        run: npm run build
+      #
+      - name: Zip Source Code
+        run: zip -r source.zip . -x "vendor/*"
+
+      - name: Zip Vendor Directory
+        run: zip -r vendor.zip vendor
+
+      - name: Copy and Extract Files on Server
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} source.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/www/wwwroot/re.saveapp.cc
+          sshpass -e scp -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} vendor.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/www/wwwroot/re.saveapp.cc
+          sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -l /www/wwwroot/re.saveapp.cc"
+          sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "unzip -o /www/wwwroot/re.saveapp.cc/source.zip -d /www/wwwroot/re.saveapp.cc/ && rm /www/wwwroot/re.saveapp.cc/source.zip"
+          sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "unzip -o /www/wwwroot/re.saveapp.cc/vendor.zip -d /www/wwwroot/re.saveapp.cc/ && rm /www/wwwroot/re.saveapp.cc/vendor.zip"
+
+      - name: Set permissions for storage and bootstrap/cache
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd /www/wwwroot/re.saveapp.cc && chown -R www:www storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
+
+      - name: Run php artisan storage:link
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "cd /www/wwwroot/re.saveapp.cc && /www/server/php/82/bin/php artisan storage:link || { echo 'SSH command failed'; exit 1; }"
