@@ -64,10 +64,10 @@
     }));
     </script>
     <script>
-        const mqttServer = "re.saveapp.cc";
+        const mqttServer = "mqtt-api.goldone-restaurant.com";
         const mqttUser = "user1";
         const mqttPassword = "12345678";
-        const mqttPort = 9001; // Updated WebSocket port
+        const mqttPort = 443; // Updated WebSocket port
 
         const client = mqtt.connect(`wss://${mqttServer}:${mqttPort}`, {
             username: mqttUser,
