@@ -40,7 +40,7 @@ class Machine extends Model
     public static function fetchAccessToken()
     {
         $client = new Client();
-        $response = $client->request('POST', 'http://re.saveapp.cc:8080/api/auth/login', [
+        $response = $client->request('POST', 'https://thingboard.saveapp.cc/api/auth/login', [
             'headers' => [
                 'Content-Type' => 'application/json',
             ],
@@ -57,7 +57,7 @@ class Machine extends Model
     public static function addDevice($accessToken, $deviceName)
     {
         $client = new Client();
-        $response = $client->request('POST', 'http://re.saveapp.cc:8080/api/device', [
+        $response = $client->request('POST', 'https://thingboard.saveapp.cc/api/device', [
             'headers' => [
                 'Content-Type' => 'application/json',
                 'X-Authorization' => 'Bearer ' . $accessToken,
@@ -76,7 +76,7 @@ class Machine extends Model
     public static function fetchToken($deviceId, $accessToken)
     {
         $client = new Client();
-        $response = $client->request('GET', "http://re.saveapp.cc:8080/api/device/{$deviceId}/credentials", [
+        $response = $client->request('GET', "https://thingboard.saveapp.cc/api/device/{$deviceId}/credentials", [
             'headers' => [
                 'Content-Type' => 'application/json',
                 'X-Authorization' => 'Bearer ' . $accessToken,

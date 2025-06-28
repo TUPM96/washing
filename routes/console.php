@@ -11,7 +11,7 @@ Artisan::command('log:everyminute', function () {
     $machines = \App\Models\Machine::all();
 
     foreach ($machines as $machine) {
-        $response = \Http::get("http://re.saveapp.cc:8080/api/v1/{$machine->token}/attributes?clientKeys=program_code,time_remaining");
+        $response = \Http::get("https://thingboard.saveapp.cc/api/v1/{$machine->token}/attributes?clientKeys=program_code,time_remaining");
         \Log::info("Fetched attributes for machine ID {$machine->id}");
         if ($response->successful()) {
             $attributes = $response->json();
