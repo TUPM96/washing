@@ -64,7 +64,7 @@
     }));
     </script>
     <script>
-        const mqttServer = "mqtt-api.goldone-restaurant.com";
+        const mqttServer = "mqtt-api.saveapp.cc";
         const mqttUser = "user1";
         const mqttPassword = "12345678";
         const mqttPort = 443; // Updated WebSocket port

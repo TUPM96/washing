@@ -19,7 +19,7 @@ const char* mqtt_server = "103.146.22.13"; // IP của MQTT broker
 const char* mqtt_user = "user1"; // MQTT username
 const char* mqtt_password = "12345678"; // MQTT password
 const int mqtt_port = 1883; // MQTT port
-const char* deviceToken = "FMkgxVUpg8q4ija2TwBN"; // Token thiết bị
+const char* deviceToken = "nSDPF9p6ySQyzleAgbH1"; // Token thiết bị
 
 #define ledSignal 2   // D4
 
