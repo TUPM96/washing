@@ -22,3 +22,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/thingboard/thingsboard_tb_node_4_0_1_1.tar
+/thingboard/postgres_16.tar
